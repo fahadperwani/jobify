@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   fullname: { type: String, required: [true, "Full Name is required"] },
   password: { type: String, required: [true, "Password is required"] },
   isAdmin: { type: Boolean, required: true },
+  refreshToken: { type: String },
 });
 
 userSchema.methods.generateAccessToken = function () {
@@ -18,6 +19,7 @@ userSchema.methods.generateAccessToken = function () {
       _id: this._id,
       username: this.username,
       fullName: this.fullName,
+      isAdmin: this.isAdmin,
     },
     process.env.ACCESS_TOKEN_SECRET,
     {
