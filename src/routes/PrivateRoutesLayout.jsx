@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { login } from "../store/reducer";
 import Loading from "../components/Loading";
 import { jwtDecode } from "jwt-decode";
+import Navbar from "../components/NavBar";
 
 export const PrivateRoutesLayout = () => {
   const location = useLocation();
@@ -28,12 +29,11 @@ export const PrivateRoutesLayout = () => {
 
   useEffect(() => {
     const checkToken = async () => {
-      const accessToken = Cookies.get("accessToken");
+      const accessToken = localStorage.getItem("accessToken");
       console.log("Access Token: ", accessToken);
       const token = decodedToken(accessToken);
       if (accessToken) {
         if (!token) {
-          Cookies.remove("accessToken");
           navigate("/login", { replace: true });
           setLoading(false);
         } else {
@@ -49,11 +49,14 @@ export const PrivateRoutesLayout = () => {
     };
 
     checkToken();
-  }, [navigate]);
+  }, []);
   return loading ? (
     <Loading />
   ) : user ? (
-    <Outlet />
+    <>
+      <Navbar />
+      <Outlet />
+    </>
   ) : (
     <Navigate to={"/login"} state={{ from: location }} replace />
   );

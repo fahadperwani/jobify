@@ -12,8 +12,8 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("My token", localStorage.getItem("accessToken"));
-    if (Cookies.get("accessToken")) navigate("/", { replace: true });
+    console.log("first", localStorage.getItem("accessToken"));
+    if (localStorage.getItem("accessToken")) navigate("/", { replace: true });
   }, []);
 
   const handleSubmit = (event) => {

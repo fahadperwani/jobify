@@ -4,7 +4,7 @@ import "./index.css";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { DashBoard } from "./pages/DashBoard";
+import DashBoard from "./pages/DashBoard";
 import Login from "./pages/Login";
 import { PrivateRoutesLayout } from "./routes/PrivateRoutesLayout";
 
