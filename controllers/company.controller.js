@@ -28,3 +28,27 @@ export const registerCompany = async (req, res) => {
       .json({ success: false, message: error.message || "Invalid Details" });
   }
 };
+
+export const getCompaniesWithJobs = async (req, res) => {
+  try {
+    const companies = await Company.aggregate([
+      {
+        $lookup: {
+          from: "jobs",
+          localField: "_id",
+          foreignField: "company",
+          as: "jobs",
+        },
+      },
+    ]);
+
+    return res.status(200).json({ success: true, data: companies });
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: error?.message || "Something went wrong",
+      });
+  }
+};

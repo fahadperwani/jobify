@@ -1,6 +1,6 @@
 import mongoose, { Mongoose } from "mongoose";
-import { Company } from "../models/company.model";
-import { Job } from "../models/job.model";
+import { Company } from "../models/company.model.js";
+import { Job } from "../models/job.model.js";
 
 export const registerJob = async (req, res) => {
   try {
@@ -29,7 +29,7 @@ export const registerJob = async (req, res) => {
       .status(200)
       .json({ success: true, data: job, message: "Job Created Successfully" });
   } catch (error) {
-    res.status(500).send({
+    res.status(500).json({
       success: false,
       message: error?.message || "Something went wrong",
     });
@@ -44,7 +44,7 @@ export const updateJob = async (req, res) => {
         .send({ success: false, message: "Only an admin can update a job" });
     const { _id, title, description, location, companyName, salary } = req.body;
 
-    const job = await Job.findOne(_id);
+    const job = await Job.findById(_id);
 
     if (!job)
       res.status(404).json({ success: false, message: "Job Not found" });

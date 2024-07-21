@@ -43,7 +43,7 @@ export const login = async (req, res) => {
         message: "Login Successful",
       });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -60,9 +60,12 @@ export const logout = async (req, res) => {
 export const refreshAccessToken = async (req, res) => {
   const incomingRefreshToken =
     req.cookies.refreshToken || req.body.refreshToken;
+  console.log(incomingRefreshToken);
 
   if (!incomingRefreshToken) {
-    res.status(401).send({ success: false, message: "Invalid Refresh Token" });
+    return res
+      .status(401)
+      .json({ success: false, message: "Invalid Refresh Token" });
   }
 
   try {
@@ -74,13 +77,13 @@ export const refreshAccessToken = async (req, res) => {
     const user = await User.findById(decodedToken?._id);
 
     if (!user) {
-      res
+      return res
         .status(401)
         .json({ success: false, message: "Invalid Refresh Token" });
     }
 
     if (incomingRefreshToken !== user?.refreshToken) {
-      res
+      return res
         .status(401)
         .json({ success: false, message: "Refresh token is expired or used" });
     }
@@ -96,18 +99,25 @@ export const refreshAccessToken = async (req, res) => {
 
     user.refreshToken = newRefreshToken;
 
+    await user.save();
+
     return res
       .status(200)
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", newRefreshToken, options)
-      .json(
-        new ApiResponse(
-          200,
-          { accessToken, refreshToken: newRefreshToken },
-          "Access token refreshed"
-        )
-      );
+      .json({
+        success: true,
+        data: {
+          user,
+          accessToken,
+          refreshToken: newRefreshToken,
+        },
+        message: "Access Token Refreshed",
+      });
   } catch (error) {
-    throw new ApiError(401, error?.message || "Invalid refresh token");
+    return res.status(401).json({
+      success: false,
+      message: error?.message || "Invalid refresh token",
+    });
   }
 };
