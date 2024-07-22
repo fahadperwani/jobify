@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import { login } from "../store/reducer";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
+import { decodedToken } from "../utils/jwt";
+import { axiosInstance } from "../utils/axios";
+import { useDispatch } from "react-redux";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -13,7 +15,11 @@ const Login = () => {
 
   useEffect(() => {
     console.log("first", localStorage.getItem("accessToken"));
-    if (localStorage.getItem("accessToken")) navigate("/", { replace: true });
+    if (localStorage.getItem("accessToken")) {
+      const data = decodedToken(localStorage.getItem("accessToken"));
+      if (data) navigate("/", { replace: true });
+      else delete axiosInstance.defaults.headers.common["Authorization"];
+    }
   }, []);
 
   const handleSubmit = (event) => {
@@ -29,6 +35,8 @@ const Login = () => {
       .then((data) => {
         if (data.success) {
           localStorage.setItem("accessToken", data.data.accessToken);
+          localStorage.setItem("refreshToken", data.data.refreshToken);
+          console.log("data: " + data.data);
           dispatch(login(data.data));
           navigate("/", { replace: true });
         } else setError(data.message);

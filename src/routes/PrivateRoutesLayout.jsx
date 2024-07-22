@@ -6,6 +6,9 @@ import { login } from "../store/reducer";
 import Loading from "../components/Loading";
 import { jwtDecode } from "jwt-decode";
 import Navbar from "../components/NavBar";
+import { decodedToken } from "../utils/jwt";
+import { axiosInstance } from "../utils/axios";
+import axios from "axios";
 
 export const PrivateRoutesLayout = () => {
   const location = useLocation();
@@ -14,36 +17,55 @@ export const PrivateRoutesLayout = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.global.user);
 
-  const decodedToken = (token) => {
-    if (!token) return true;
-    try {
-      const decodedToken = jwtDecode(token);
-      const currentTime = Date.now() / 1000;
-      if (decodedToken.exp < currentTime) return null;
-      return decodedToken;
-    } catch (error) {
-      console.error("Error decoding token:", error);
-      return true;
-    }
-  };
-
   useEffect(() => {
     const checkToken = async () => {
       const accessToken = localStorage.getItem("accessToken");
-      console.log("Access Token: ", accessToken);
+      console.log(accessToken);
+      if (!accessToken) {
+        navigate("/login", { replace: true });
+        setLoading(false);
+      }
       const token = decodedToken(accessToken);
-      if (accessToken) {
-        if (!token) {
-          navigate("/login", { replace: true });
-          setLoading(false);
+      console.log("Accesss Tokens ", token);
+      if (!token) {
+        const refreshToken = localStorage.getItem("refreshToken");
+        console.log("refreshToken", refreshToken);
+        if (refreshToken) {
+          axios
+            .post(
+              process.env.REACT_APP_BACKEND_URI +
+                "/api/user/refreshAccessToken",
+              {},
+              { withCredentials: true }
+            )
+            .then((res) => {
+              if (res.data.data.success) {
+                localStorage.setItem("accessToken", res.data.data.accessToken);
+                localStorage.setItem(
+                  "refreshToken",
+                  res.data.data.refreshToken
+                );
+                axiosInstance.defaults.headers.common["Authorization"] = `
+          Bearer ${res.data.data.accessToken}`;
+                dispatch(login(res.data.data.user));
+              } else {
+                navigate("/login", { replace: true });
+              }
+            })
+            .catch(() => {
+              navigate("/login", { replace: true });
+            });
         } else {
-          if (!user) {
-            dispatch(login(token));
-          }
-          setLoading(false);
+          navigate("/login", { replace: true });
         }
       } else {
-        navigate("/login", { replace: true });
+        if (!user) {
+          console.log("hel");
+          dispatch(login(token));
+          if (!axiosInstance.defaults.headers.common["Authorization"])
+            axiosInstance.defaults.headers.common["Authorization"] = `
+          Bearer ${token}`;
+        }
         setLoading(false);
       }
     };

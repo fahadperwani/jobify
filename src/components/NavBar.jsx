@@ -1,12 +1,27 @@
-import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { IoPersonOutline, IoLogOutOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
+import { axiosInstance } from "../utils/axios";
 
 const Navbar = () => {
   const location = useLocation();
   const [activeLink, setActiveLink] = React.useState(location.pathname);
   const user = useSelector((state) => state.global.user);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    const result = await axiosInstance.post(
+      "/api/user/logout",
+      {},
+      { withCredentials: true }
+    );
+    if (result.status == 200) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      navigate("/login", { replace: true });
+    }
+  };
 
   const handleLinkClick = (path) => {
     setActiveLink(path);
@@ -29,22 +44,22 @@ const Navbar = () => {
         </li>
         <li className="mb-2">
           <NavLink
-            to="/add-company"
+            to="/company/add"
             className={({ isActive }) =>
               isActive ? "text-indigo-200" : "text-white hover:text-indigo-200"
             }
-            onClick={() => handleLinkClick("/add-company")}
+            onClick={() => handleLinkClick("/company/add")}
           >
             Add Company
           </NavLink>
         </li>
         <li className="mb-2">
           <NavLink
-            to="/add-job"
+            to="/job/add"
             className={({ isActive }) =>
               isActive ? "text-indigo-200" : "text-white hover:text-indigo-200"
             }
-            onClick={() => handleLinkClick("/add-job")}
+            onClick={() => handleLinkClick("job/add")}
           >
             Add Job
           </NavLink>
@@ -56,7 +71,7 @@ const Navbar = () => {
         <IoLogOutOutline
           size={24}
           className="ml-4 text-white cursor-pointer"
-          onClick={() => console.log("Logout clicked")}
+          onClick={handleLogout}
         />
       </div>
     </nav>
