@@ -8,12 +8,10 @@ export const login = async (req, res) => {
 
     const user = await User.findOne({ username }).select("-refreshToken");
 
-    console.log(user);
-
     if (!user || user.password !== password)
       return res
         .status(404)
-        .json({ success: false, message: "User not found" });
+        .json({ success: false, message: "Invalid Username or Password" });
 
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
@@ -60,7 +58,7 @@ export const logout = async (req, res) => {
 export const refreshAccessToken = async (req, res) => {
   const incomingRefreshToken =
     req.cookies.refreshToken || req.body.refreshToken;
-  console.log(incomingRefreshToken);
+  console.log("incomingRefreshToken", incomingRefreshToken);
 
   if (!incomingRefreshToken) {
     return res

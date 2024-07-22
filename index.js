@@ -8,9 +8,26 @@ import jobRouter from "./routes/job.routes.js";
 
 const app = express();
 
+app.use(function (req, res, next) {
+  console.log("helloo");
+  res.header("Content-Type", "application/json;charset=UTF-8");
+  res.header("Access-Control-Allow-Credentials", true);
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  })
+);
+
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
 
 app.get("/", (req, res) => res.send("hello"));
 

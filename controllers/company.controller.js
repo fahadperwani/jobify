@@ -5,7 +5,7 @@ export const registerCompany = async (req, res) => {
   try {
     if (!req.user?.isAdmin)
       return res
-        .status(404)
+        .status(400)
         .send({ success: false, message: "Only an admin can add a Company" });
     console.log(req.body);
     const { name, contactEmail, address } = req.body;
@@ -35,7 +35,7 @@ export const getCompaniesWithJobs = async (req, res) => {
       {
         $lookup: {
           from: "jobs",
-          localField: "_id",
+          localField: "name",
           foreignField: "company",
           as: "jobs",
         },
@@ -44,11 +44,9 @@ export const getCompaniesWithJobs = async (req, res) => {
 
     return res.status(200).json({ success: true, data: companies });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: error?.message || "Something went wrong",
-      });
+    res.status(500).json({
+      success: false,
+      message: error?.message || "Something went wrong",
+    });
   }
 };

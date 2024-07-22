@@ -12,6 +12,6 @@ jobRouter.post("/register", verifyJWT, registerJob);
 
 jobRouter.put("/update", verifyJWT, updateJob);
 
-jobRouter.delete("/delete", verifyJWT, deleteJob);
+jobRouter.delete("/delete/:id", verifyJWT, deleteJob);
 
 export default jobRouter;

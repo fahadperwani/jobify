@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 export const verifyJWT = async (req, res, next) => {
   console.log(req.body);
-  console.log(req.cookies?.accessToken);
+  console.log("Cookie", req.header("Authorization"));
   try {
     console.log(req.body);
     const token =
@@ -12,7 +12,9 @@ export const verifyJWT = async (req, res, next) => {
 
     // console.log(token);
     if (!token) {
-      res.status(401).json({ success: false, message: "Invalid access token" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid access token" });
     }
 
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
@@ -23,11 +25,14 @@ export const verifyJWT = async (req, res, next) => {
     );
 
     if (!user)
-      res.status(401).json({ success: false, message: "Invalid access token" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid access token" });
 
     req.user = user;
     next();
   } catch (error) {
+    console.log(error);
     res.status(401).json({
       success: false,
       message: error?.message || "Invalid access token",

@@ -9,6 +9,7 @@ export const registerJob = async (req, res) => {
         .status(404)
         .send({ success: false, message: "Only an admin can add a job" });
     const { title, description, location, companyName, salary } = req.body;
+    console.log(req.body);
 
     const company = await Company.findOne({ name: companyName });
 
@@ -19,15 +20,17 @@ export const registerJob = async (req, res) => {
       title,
       description,
       location,
-      company: company._id,
+      company: company.name,
       salary,
     });
 
     await job.save();
 
-    res
-      .status(200)
-      .json({ success: true, data: job, message: "Job Created Successfully" });
+    res.status(200).json({
+      success: true,
+      data: job,
+      message: "Job Created Successfully",
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -57,7 +60,7 @@ export const updateJob = async (req, res) => {
     job.title = title;
     job.description = description;
     job.location = location;
-    job.company = company._id;
+    job.company = company.name;
     job.salary = salary;
 
     await job.save();
@@ -79,9 +82,8 @@ export const deleteJob = async (req, res) => {
       return res
         .status(404)
         .send({ success: false, message: "Only an admin can delete a job" });
-    const { _id } = req.body;
-
-    const job = await Job.findByIdAndDelete(_id);
+    console.log(req.params.id);
+    const job = await Job.findByIdAndDelete(req.params.id);
 
     if (!job)
       return res.status(404).send({ success: false, message: "Job not found" });
